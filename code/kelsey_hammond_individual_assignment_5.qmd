@@ -1,0 +1,11 @@
+---
+title: "Individual Assignment 5"
+author: "Kelsey Hammond"
+date: "05-10-2026"
+format: pdf
+execute: 
+  message: false
+  warning: false
+---
+
+# 1. Set up
