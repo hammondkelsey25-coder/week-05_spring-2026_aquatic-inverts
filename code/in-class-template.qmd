@@ -2,6 +2,9 @@
 title: "in-class template"
 author: "Kelsey Hammond"
 format: pdf
+execute:
+  message: false
+  warning: false
 ---
 
 #1. Set up
@@ -222,6 +225,8 @@ Missing values for salinity, pH, and dissolved oxygen might influence later figu
 
 ```{r}
 #| label: salintiy-plot
+#| fig-height: 4
+#| fig-width: 8
 
 # creating a new object to store plot
 salinity_plot <- ggplot(data = aq_ins_clean,
@@ -230,15 +235,60 @@ salinity_plot <- ggplot(data = aq_ins_clean,
                         mapping = aes(x = site_full,
                                       y = med_sal)) +
   # points representing median salinity at each survey
-  geom_jitter(height = 0) +
+  geom_jitter(height = 0,
+              width = 0.1,
+              shape = 21) +
   stat_summary(geom = "point",
                fun = median,
                color = "red",
-               size = 2)
+               size = 2) +
+  # wrapping x-axis labels
+  scale_x_discrete(labels = label_wrap(width = 15)) +
+  labs(x = "Site",
+       y = "Median salinity (ppt)",
+       title = "Site salinity") +
+  theme_bw()
 
 # displaying the object
 salinity_plot
 ```
 
 Sites seem to differ in salinity, North of Vencoco Bridge, East Channel, and Main Channel tend to be hypersaline, while Deveraux Creek, North of Phelps Bridge, Phelps Road are the least saline. South of Phelps Bridge tends to be more freshwater but is higher in salinity than the other, lower salinity sites.
+
+## Visualize differences in copepod abundance
+
+- x-axis: `site_full`
+- y-axis: `ave_lit`
+- geometry to represent observations: `geom_jitter()`
+- geometry to represent medians: `stat_summary()`
+
+### Initial cleaning
+
+```{r}
+#| label: copepod-cleaning
+
+copepods <- aq_ins_clean |> 
+  filter(taxon == "copepod") |> 
+  mutate(log_ave_lit = log(ave_lit + 1))
+```
+
+### Visualizing:
+
+```{r}
+#| label: copepod-plot
+
+copepod_plot <- ggplot(data = copepods,
+                       mapping = aes(x = site_full,
+                                     y = log_ave_lit)) +
+  geom_jitter(height = 0,
+              width = 0.1,
+              shape = 21) +
+  stat_summary(geom = "point",
+               fun = median,
+               color = "blue",
+               size = 2)
+
+copepod_plot
+```
+
 
