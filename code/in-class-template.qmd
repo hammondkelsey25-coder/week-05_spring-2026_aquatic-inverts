@@ -277,18 +277,43 @@ copepods <- aq_ins_clean |>
 ```{r}
 #| label: copepod-plot
 
+# creating object to store plot
 copepod_plot <- ggplot(data = copepods,
+                       # x-axis: full site name
+                       # y-axis: log transformed average count/L
                        mapping = aes(x = site_full,
                                      y = log_ave_lit)) +
+  # jitter to represent each sample
   geom_jitter(height = 0,
               width = 0.1,
               shape = 21) +
+  # points to represent median copepod abundance
   stat_summary(geom = "point",
                fun = median,
                color = "blue",
-               size = 2)
+               size = 2) +
+  # wrapping x-axis labels
+  scale_x_discrete(labels = label_wrap(width = 15)) +
+  # relabelling axes
+  labs(x = "Site",
+       y = "log + 1 transformed average abundance/L",
+       title = "Copepod Abundance") +
+  # using different theme
+  theme_bw()
 
+# displaying plot
 copepod_plot
 ```
+
+Copepod abundance differs across sites. 
+
+## Putting salinity and copepod abundance together
+
+```{r}
+#| label: multipanel
+
+salinity_plot / copepod_plot
+```
+
 
 
