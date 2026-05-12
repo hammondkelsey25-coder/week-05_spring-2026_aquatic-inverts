@@ -147,36 +147,44 @@ taxonomic information for each organism and the water quality for each survey.
 ```{r}
 #| label: cleaning-aquatic-insects
 
-# creating new data frame from aq_ins
+# creating new clean object from aquatic inverts
 aq_ins_clean <- aq_ins |> 
+  # clean column names
   clean_names() |> 
+  # filtering join: only include sites occurring in ncos_sites
   semi_join(ncos_sites, by = c("site")) |> 
+  # renaming columns
   rename(date = date_on_vial) |> 
+  # select columns of interest
   select(date, sample_type, site,
          ostracod,
          copepod,
          hemiptera_corixidae_boatman,
          cladocera,
          nematode,
-         diptera_ceratopogonidae,
+         diptera_ceratopogonidae, 
          annelida_oligochaete,
          diptera_chironomid,
          annelida_polychaete) |> 
-  filter(sample_type %in% c("FB250", "FB 250")) |> 
-  pivot_longer(
-    # columns to make longer
-    cols = ostracod:annelida_polychaete,
-    # new column for the old column names
-    names_to = "taxon",
-    # new column for the values in each of the old columns
-    values_to = "abundance"
-  ) |> 
+  # filter to only include "filtered beaker" samples
+  filter(sample_type %in% c("FB 250", "FB250")) |> 
+  # convert the data frame to long format
+  pivot_longer(cols = ostracod:annelida_polychaete,
+               names_to = "taxon",
+               values_to = "abundance") |> 
+  # group by date, site, taxon
   group_by(date, site, taxon) |> 
+  # calculate average abundance per liter (sum abundance divided by 7.5 liters)
   summarize(ave_lit = sum(abundance, na.rm = TRUE)/7.5) |> 
+  # ungroup data frame
   ungroup() |> 
-  unite("date_site", date, site, remove = TRUE) |> 
-  left_join(water_quality_clean, by = "date_site") |> 
+  # create a new column called `date_site` to join with water quality
+  unite("date_site", date, site, remove = FALSE) |> 
+  # join with water quality
+  left_join(water_quality_clean, by = c("date_site")) |> 
+  # join with taxon list
   left_join(taxon_list_clean, by = c("taxon" = "verbatim_name")) |> 
+  # add full names of sites
   mutate(site_full = case_when(
     site == "NVBR" ~ "North of Venoco Bridge",
     site == "NEC" ~ "South of Venoco Bridge",
@@ -184,12 +192,53 @@ aq_ins_clean <- aq_ins |>
     site == "NPB" ~ "South of Phelps Bridge",
     site == "NPB1" ~ "North of Phelps Bridge",
     site == "NPB2" ~ "Phelps Road",
-    site == "NWP" ~ "West Pond",
+    site == "NWP" ~  "West Pond",
     site == "NDC" ~ "Devereux Creek"
-  ))
+  )) |> 
+  # setting factor levels for site
+  mutate(site_full = fct_reorder(site_full, med_sal, .fun = "median", .na_rm = TRUE),
+         site_full = fct_rev(site_full))
 ```
 
 
+# 3. Visualizing
 
+## Visualize missing values
 
+```{r}
+#| label: missing-viz
+
+gg_miss_var(aq_ins_clean)
+```
+
+Missing values for salinity, pH, and dissolved oxygen might influence later figures.
+
+## Visualize salinity
+
+- x-axis: `site`
+- y-axis: `mean_sal`
+- geometry to show salinity during survey: `geom_jitter`
+- geometry to show mean salinity: `stat_summary`
+
+```{r}
+#| label: salintiy-plot
+
+# creating a new object to store plot
+salinity_plot <- ggplot(data = aq_ins_clean,
+                        # x-axis: full site name
+                        # y-axis: median salinity
+                        mapping = aes(x = site_full,
+                                      y = med_sal)) +
+  # points representing median salinity at each survey
+  geom_jitter(height = 0) +
+  stat_summary(geom = "point",
+               fun = median,
+               color = "red",
+               size = 2)
+
+# displaying the object
+salinity_plot
+```
+
+Sites seem to differ in salinity, North of Vencoco Bridge, East Channel, and Main Channel tend to be hypersaline, while Deveraux Creek, North of Phelps Bridge, Phelps Road are the least saline. South of Phelps Bridge tends to be more freshwater but is higher in salinity than the other, lower salinity sites.
 
