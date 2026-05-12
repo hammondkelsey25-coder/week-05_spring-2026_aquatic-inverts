@@ -276,6 +276,8 @@ copepods <- aq_ins_clean |>
 
 ```{r}
 #| label: copepod-plot
+#| fig-width: 8
+#| fig-height: 4
 
 # creating object to store plot
 copepod_plot <- ggplot(data = copepods,
@@ -311,6 +313,8 @@ Copepod abundance differs across sites.
 
 ```{r}
 #| label: multipanel
+#| fig-width: 8
+#| fig-height: 10
 
 salinity_plot / copepod_plot
 ```
