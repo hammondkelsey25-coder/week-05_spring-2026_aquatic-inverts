@@ -163,3 +163,58 @@ aq_ins_clean <- aq_ins |>
   mutate(site_full = fct_reorder(site_full, med_sal, .fun = "median", .na_rm = TRUE),
          site_full = fct_rev(site_full))
 ```
+
+
+# 2. Problems
+
+1. Visualizing differences across sites in major taxon abundance
+
+a. Plan your figure
+
+- create an object to store new plot
+- x-axis should be `site_full`
+- y-axis should be `log_avg_lit`
+- geometry to represent average abundance/L: `geom_jitter()`
+- geometry to represent medians: `stat_summary()`
+
+b. Wrangle your data
+
+```{r}
+#| label: ostracod-cleaning
+
+# creating new object from clean aquatic inverts
+ostracods <- aq_ins_clean |> 
+  # filtering to only include ostrapods
+  filter(taxon == "ostracod") |> 
+  # log + 1 transform mean abundance per liter
+  mutate(log_ave_lit = log(ave_lit + 1))
+
+slice_sample(ostracods, n = 10)
+```
+
+c. Code your figure
+
+```{r}
+#| label: visualizing-ostracod
+#| fig-height: 6
+#| fig-width: 8
+
+ostracod_plot <- ggplot(data = ostracods,
+                        mapping = aes(x = site_full,
+                                      y = log_ave_lit)) +
+  geom_jitter(height = 0,
+              width = 0.1,
+              shape = 21) +
+  scale_x_discrete(labels = label_wrap(15)) +
+  stat_summary(geom = "point",
+               fun = "median",
+               size = 4,
+               color = "pink") +
+  labs(x = "Site",
+       y = "Log + 1 transformed average abundance/L",
+       title = "Ostrapod Abundance") +
+  theme_bw()
+
+ostracod_plot
+```
+
