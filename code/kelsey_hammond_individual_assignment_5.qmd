@@ -32,6 +32,9 @@ library(naniar)
 
 # arranging plots
 library(patchwork)
+
+# data visualization
+library(NatParksPalettes)
 ```
 
 ## Data
@@ -317,3 +320,47 @@ Copepod abundance is high at North of Venoco Bridge, South of Venoco Bridge, Sou
 Ostracod abundance is high at South of Phelps Bridge and Devereux Creek. It is low at North of Venoco Bridge, South of Vencoco Bridge, Main Channel, North of Phelps Bridge, and Phelps Road.
 
 The two highest levels of ostracod abundance are at South of Phelps Bridge and Devereux Creek. When looking at the median salinity for those two sites, they are both very low, Devereux Creek being the lowest. This may show that ostracods prefer low salinity.
+
+2. Visualizing total abundance as a function of salinity
+
+a. Plan your figure
+
+- x-axis: `med_sal`
+- y-axis: `log_ave_lit`
+- color: `taxon`
+- geometry: `geom_point()`
+- facets: `facet_wrap(~taxon, scales = "free")`
+
+b. Wrangle your data
+
+```{r}
+#| label: cleaning-aq-ins
+
+aq_ins_clean <- aq_ins_clean |> 
+  mutate(taxon = to_any_case(taxon, case = "title")) |> 
+  mutate(log_ave_lit = log(ave_lit + 1)) |> 
+  select(log_ave_lit, taxon, med_sal) |> 
+  mutate(taxon = fct_reorder(taxon, log_ave_lit, .fun = "max", .na_rm = TRUE))
+
+slice_sample(aq_ins_clean, n = 10)
+```
+
+c. Code your figure
+
+```{r}
+#| label: visualize-log-abundance
+
+ggplot(data = aq_ins_clean,
+       mapping = aes(x = med_sal,
+                     y = log_ave_lit,
+                     color = taxon)) +
+  geom_point() +
+  labs(x = "Median Salinity (ppt)",
+       y = "log + 1 transformed average abundance/L",
+       title = "Log transformed abundance as a function of salinity") +
+  theme_bw() +
+  scale_color_manual(values = natparks.pals("Torres")) +
+  theme(legend.position = "none") +
+  facet_wrap(~taxon, scales = "free")
+```
+
