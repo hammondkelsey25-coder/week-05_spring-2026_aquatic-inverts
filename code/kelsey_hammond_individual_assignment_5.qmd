@@ -291,7 +291,7 @@ ostracod_plot <- ggplot(data = ostracods,
   # relabeling axes and adding title
   labs(x = "Site",
        y = "log + 1 transformed average abundance/L",
-       title = "Ostrapod Abundance") +
+       title = "Ostracods") +
   # custom theme
   theme_bw()
 
@@ -310,3 +310,10 @@ d. Create a multipanel figure
 salinity / (copepods | ostracod_plot)
 ```
 
+e. Interpret your figure
+
+Copepod abundance is high at North of Venoco Bridge, South of Venoco Bridge, South of Phelps Bridge, and Devereux Creek. It is low at Main Channel, North of Phelps Bridge, and Phelps Road.
+
+Ostracod abundance is high at South of Phelps Bridge and Devereux Creek. It is low at North of Venoco Bridge, South of Vencoco Bridge, Main Channel, North of Phelps Bridge, and Phelps Road.
+
+The two highest levels of ostracod abundance are at South of Phelps Bridge and Devereux Creek. When looking at the median salinity for those two sites, they are both very low, Devereux Creek being the lowest. This may show that ostracods prefer low salinity.
