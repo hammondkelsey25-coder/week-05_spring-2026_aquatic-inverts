@@ -264,6 +264,7 @@ ostracods <- aq_ins_clean |>
   # log + 1 transform mean abundance per liter
   mutate(log_ave_lit = log(ave_lit + 1))
 
+# displaying a sample of 10 observations
 slice_sample(ostracods, n = 10)
 ```
 
@@ -336,12 +337,18 @@ b. Wrangle your data
 ```{r}
 #| label: cleaning-aq-ins
 
-aq_ins_clean <- aq_ins_clean |> 
+# editing the data frame
+aq_ins_clean <- aq_ins_clean |>
+  # chaning taxon to be title case
   mutate(taxon = to_any_case(taxon, case = "title")) |> 
+  # log + 1 transforming average abundance/L
   mutate(log_ave_lit = log(ave_lit + 1)) |> 
+  # selecting only average abundance, taxon, and median salinity columns
   select(log_ave_lit, taxon, med_sal) |> 
+  # reordering taxon by maximum abundance
   mutate(taxon = fct_reorder(taxon, log_ave_lit, .fun = "max", .na_rm = TRUE))
 
+# displaying sample of 10 observations
 slice_sample(aq_ins_clean, n = 10)
 ```
 
@@ -350,17 +357,34 @@ c. Code your figure
 ```{r}
 #| label: visualize-log-abundance
 
+# base layer: ggplot
 ggplot(data = aq_ins_clean,
+       # x-axis: median salinity
+       # y-axis: log average abundance/L
+       # color: taxon
        mapping = aes(x = med_sal,
                      y = log_ave_lit,
                      color = taxon)) +
+  # first layer: point
   geom_point() +
+  # relabelling axes, adding title
   labs(x = "Median Salinity (ppt)",
        y = "log + 1 transformed average abundance/L",
        title = "Log transformed abundance as a function of salinity") +
+  # custom theme
   theme_bw() +
+  # custom colors
   scale_color_manual(values = natparks.pals("Torres")) +
+  # removing legend
   theme(legend.position = "none") +
+  # wrapping so axes are on free scales
   facet_wrap(~taxon, scales = "free")
 ```
 
+d. Interpret your figure
+
+Nematodes, Annelida Oligochaete, and Annelida Polychaete all have similar relationships between salinity and abundance with the abundance remaining relativley low despite changes in salinity.
+
+Cladocera, Copepod, and Ostracod all have similar relationships to each other with high abundance when there is low salinity. Copepod abundance varies slightly from the other two with high abundance around median salinity of 40 ppt. Himiptera Corixidae Boatman also follows a similar trend but with a weakeer relationship.
+
+Diptera Ceratopogonidae, Diptera Chironomid have similar relationship, both have a slight increase at median salinity of 40 ppt (similar to Copepod).
