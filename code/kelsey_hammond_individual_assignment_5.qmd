@@ -54,7 +54,8 @@ sites <- read_xlsx(here("data", "Aquatic Sampling Data-2026-03-10.xlsx"),
                    sheet = "sites")
 
 # water quality information
-water_quality <- read_xlsx(here("data", "Aquatic Sampling Data-2026-03-10.xlsx"),
+water_quality <- read_xlsx(here("data", 
+                                "Aquatic Sampling Data-2026-03-10.xlsx"),
                            sheet = "Water Quality",
                            na = c("", "n/a", "N/A", "over", "173+")) 
 ```
@@ -141,7 +142,8 @@ aq_ins_clean <- aq_ins |>
                values_to = "abundance") |> 
   # group by date, site, taxon
   group_by(date, site, taxon) |> 
-  # calculate average abundance per liter (sum abundance divided by 7.5 liters)
+  # calculate average abundance per liter 
+  # (sum abundance divided by 7.5 liters)
   summarize(ave_lit = sum(abundance, na.rm = TRUE)/7.5) |> 
   # ungroup data frame
   ungroup() |> 
@@ -163,7 +165,9 @@ aq_ins_clean <- aq_ins |>
     site == "NDC" ~ "Devereux Creek"
   )) |> 
   # setting factor levels for site
-  mutate(site_full = fct_reorder(site_full, med_sal, .fun = "median", .na_rm = TRUE),
+  mutate(site_full = fct_reorder(site_full,
+                                 med_sal, 
+                                 .fun = "median", .na_rm = TRUE),
          site_full = fct_rev(site_full))
 ```
 
@@ -335,7 +339,7 @@ a. Plan your figure
 b. Wrangle your data
 
 ```{r}
-#| label: cleaning-aq-ins
+#| label: cleaning-aq-ins-clean
 
 # editing the data frame
 aq_ins_clean <- aq_ins_clean |>
@@ -356,6 +360,8 @@ c. Code your figure
 
 ```{r}
 #| label: visualize-log-abundance
+#| fig-height: 10
+#| fig-width: 8
 
 # base layer: ggplot
 ggplot(data = aq_ins_clean,
